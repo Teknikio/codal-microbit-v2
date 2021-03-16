@@ -43,7 +43,6 @@ const uint16_t MicroBitMicrophoneService::charUUID[ mbbs_cIdxCOUNT] = { 0x9350, 
   * @param _ble The instance of a BLE device that we're running on.
   */
 MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) :
-    thermometer(_thermometer)
 {
     // Initialise our characteristic values.
     microphoneDataCharacteristicBuffer   = 0;
@@ -79,13 +78,13 @@ void MicroBitMicrophoneService::listen( bool yes)
         if ( yes)
         {
             // Ensure thermometer is being updated
-            microphoneDataCharacteristicBuffer   = 1;//thermometer.getTemperature();
-            microphonePeriodCharacteristicBuffer = 1;//thermometer.getPeriod();
-            EventModel::defaultEventBus->listen(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate, MESSAGE_BUS_LISTENER_IMMEDIATE);
+            //microphoneDataCharacteristicBuffer   = 1;//thermometer.getTemperature();
+            //microphonePeriodCharacteristicBuffer = 1;//thermometer.getPeriod();
+            //EventModel::defaultEventBus->listen(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate, MESSAGE_BUS_LISTENER_IMMEDIATE);
         }
         else
         {
-            EventModel::defaultEventBus->ignore(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate);
+            //EventModel::defaultEventBus->ignore(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate);
         }
     }
 }
