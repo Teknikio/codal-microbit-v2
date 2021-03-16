@@ -81,13 +81,12 @@ DEALINGS IN THE SOFTWARE.
 #include "MicroBitIOPinService.h"
 #include "MicroBitTemperatureService.h"
 #include "MicroBitUARTService.h"
+#include "MicroBitMicrophoneService.h"
 #endif
 
 #include "MicroBitStorage.h"
 
 //#include "MicroBitLightSensor.h"
-
-
 
 // Status flag values
 #define DEVICE_INITIALIZED                    0x01
