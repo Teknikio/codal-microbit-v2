@@ -44,7 +44,7 @@ class MicroBitMicrophoneService : public MicroBitBLEService, public DataSink
 
     /**
       * Constructor.
-      * Create a representation of the TemperatureService
+      * Create a representation of the MicophoneService
       * @param _thermometer An instance of MicroBitThermometer to use as our temperature source.
       */
     MicroBitMicrophoneService( BLEDevice &_ble);
@@ -85,15 +85,13 @@ class MicroBitMicrophoneService : public MicroBitBLEService, public DataSink
      */
     void microphoneUpdate(MicroBitEvent e);
 
-    // memory for our temperature characteristic.
+    // memory for our mic data characteristic.
     int8_t             microphoneDataCharacteristicBuffer;
-    uint16_t           microphonePeriodCharacteristicBuffer;
     
     // Index for each charactersitic in arrays of handles and UUIDs
     typedef enum mbbs_cIdx
     {
         mbbs_cIdxDATA,
-        mbbs_cIdxPERIOD,
         mbbs_cIdxCOUNT
     } mbbs_cIdx;
     

@@ -45,7 +45,7 @@ extern  MicroBit uBit;
 #include "MicroBitMicrophoneService.h"
 
 const uint16_t MicroBitMicrophoneService::serviceUUID               = 0x6200;
-const uint16_t MicroBitMicrophoneService::charUUID[ mbbs_cIdxCOUNT] = { 0x9350, 0x1c25 };
+const uint16_t MicroBitMicrophoneService::charUUID[ mbbs_cIdxCOUNT] = { 0x9350 };
 
 
 /**
@@ -61,7 +61,6 @@ MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble )
     this->windowSize = LEVEL_DETECTOR_DEFAULT_WINDOW_SIZE;
     // Initialise our characteristic values.
     microphoneDataCharacteristicBuffer   = 0;
-    microphonePeriodCharacteristicBuffer = 0;
     
     // Register the base UUID and create the service.
     RegisterBaseUUID( bs_base_uuid);
@@ -73,27 +72,13 @@ MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble )
                          sizeof(microphoneDataCharacteristicBuffer), sizeof(microphoneDataCharacteristicBuffer),
                          microbit_propREAD | microbit_propNOTIFY);
 
-    CreateCharacteristic( mbbs_cIdxPERIOD, charUUID[ mbbs_cIdxPERIOD],
-                         (uint8_t *)&microphonePeriodCharacteristicBuffer,
-                         sizeof(microphonePeriodCharacteristicBuffer), sizeof(microphonePeriodCharacteristicBuffer),
-                         microbit_propREAD | microbit_propWRITE);
+    if (processor == NULL)
+        processor = new StreamNormalizer(mic->output, 0.05f, true, DATASTREAM_FORMAT_8BIT_SIGNED);
+        
+        processor->output.connect(*this);
 
     if ( getConnected())
         listen( true);
-
-    if (mic == NULL){
-        mic = uBit.adc.getChannel(uBit.io.microphone);
-        mic->setGain(7,0);          // Uncomment for v1.47.2
-        //mic->setGain(7,1);        // Uncomment for v1.46.2
-    }
-
-    if (processor == NULL)
-        processor = new StreamNormalizer(mic->output, 0.05f, true, DATASTREAM_FORMAT_8BIT_SIGNED);
-    
-    processor->output.connect(*this);
-
-    uBit.io.runmic.setDigitalValue(1);
-    uBit.io.runmic.setHighDrive(true);
 }
 
 /**
@@ -101,7 +86,7 @@ MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble )
  */
 int MicroBitMicrophoneService::pullRequest()
 {
-    ManagedBuffer b = processor->pull();
+    ManagedBuffer b = processor->output.pull();
     int16_t *data = (int16_t *) &b[0];
 
     int samples = b.length() / 2;
@@ -121,30 +106,30 @@ int MicroBitMicrophoneService::pullRequest()
         data++;
     }
 
-    notifyChrValue( mbbs_cIdxDATA, (uint8_t *)&level, sizeof(level));
-
+    notifyChrValue( mbbs_cIdxDATA, (uint8_t *)&level, 1);
     return DEVICE_OK;
 }
+
 /**
   * Set up or tear down event listers
   */
 void MicroBitMicrophoneService::listen( bool yes)
 {
-    if (EventModel::defaultEventBus)
+    if ( yes)
     {
-        if ( yes)
-        {
-            // Ensure thermometer is being updated
-            //microphoneDataCharacteristicBuffer   = 1;//thermometer.getTemperature();
-            //microphonePeriodCharacteristicBuffer = 1;//thermometer.getPeriod();
-            EventModel::defaultEventBus->listen(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate, MESSAGE_BUS_LISTENER_IMMEDIATE);
+        if (mic == NULL){
+            mic = uBit.adc.getChannel(uBit.io.microphone);
+            mic->setGain(7,0);          // Uncomment for v1.47.2
+            //mic->setGain(7,1);        // Uncomment for v1.46.2
         }
-        else
-        {
-            //EventModel::defaultEventBus->ignore(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate);
-        }
+        uBit.io.runmic.setDigitalValue(1);
+        uBit.io.runmic.setHighDrive(true);
     }
-
+    else
+    {
+        uBit.io.runmic.setDigitalValue(0);
+        uBit.io.runmic.setHighDrive(false);
+    }
 }
 
 
@@ -171,16 +156,7 @@ void MicroBitMicrophoneService::onDisconnect( const microbit_ble_evt_t *p_ble_ev
   */
 void MicroBitMicrophoneService::onDataWritten(const microbit_ble_evt_write_t *params)
 {
-    if (params->handle == valueHandle( mbbs_cIdxPERIOD) && params->len >= sizeof(microphonePeriodCharacteristicBuffer))
-    {
-        //memcpy(&microphonePeriodCharacteristicBuffer, params->data, sizeof(microphonePeriodCharacteristicBuffer));
-        //thermometer.setPeriod(microphonePeriodCharacteristicBuffer);
 
-        // The accelerometer will choose the nearest period to that requested that it can support
-        // Read back the ACTUAL period it is using, and report this back.
-        //microphonePeriodCharacteristicBuffer = thermometer.getPeriod();
-        //setChrValue( mbbs_cIdxPERIOD, (const uint8_t *)&microphonePeriodCharacteristicBuffer, sizeof(microphonePeriodCharacteristicBuffer));
-    }
 }
 
 
