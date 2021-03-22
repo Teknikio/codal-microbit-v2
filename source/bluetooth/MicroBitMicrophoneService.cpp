@@ -72,13 +72,20 @@ MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble )
                          sizeof(microphoneDataCharacteristicBuffer), sizeof(microphoneDataCharacteristicBuffer),
                          microbit_propREAD | microbit_propNOTIFY);
 
+    if (mic == NULL){
+        mic = uBit.adc.getChannel(uBit.io.microphone);
+        mic->setGain(7,0);          // Uncomment for v1.47.2
+        //mic->setGain(7,1);        // Uncomment for v1.46.2
+    }
+    
     if (processor == NULL)
-        processor = new StreamNormalizer(mic->output, 0.05f, true, DATASTREAM_FORMAT_8BIT_SIGNED);
-        
-        processor->output.connect(*this);
+      processor = new StreamNormalizer(mic->output, 0.05f, true, DATASTREAM_FORMAT_8BIT_SIGNED);
+    
+    processor->output.connect(*this);
 
     if ( getConnected())
         listen( true);
+
 }
 
 /**
@@ -117,11 +124,6 @@ void MicroBitMicrophoneService::listen( bool yes)
 {
     if ( yes)
     {
-        if (mic == NULL){
-            mic = uBit.adc.getChannel(uBit.io.microphone);
-            mic->setGain(7,0);          // Uncomment for v1.47.2
-            //mic->setGain(7,1);        // Uncomment for v1.46.2
-        }
         uBit.io.runmic.setDigitalValue(1);
         uBit.io.runmic.setHighDrive(true);
     }
