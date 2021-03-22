@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 #define MICROBIT_MICROPHONE_SERVICE_H
 
 #include "MicroBitConfig.h"
-
+#include "MicroBit.h"
 #if CONFIG_ENABLED(DEVICE_BLE)
 
 #include "MicroBitBLEManager.h"
@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
   * Class definition for the custom MicroBit Microphone Service.
   * Provides a BLE service to remotely monitor mic input
   */
-class MicroBitMicrophoneService : public MicroBitBLEService
+class MicroBitMicrophoneService : public MicroBitBLEService, public DataSink
 {
     public:
 
@@ -48,7 +48,16 @@ class MicroBitMicrophoneService : public MicroBitBLEService
       * @param _thermometer An instance of MicroBitThermometer to use as our temperature source.
       */
     MicroBitMicrophoneService( BLEDevice &_ble);
-    
+    int             windowSize;         // The number of samples the make up a level detection window.
+    int             windowPosition;     // The number of samples used so far in the calculation of a window.
+    int             level;              // The current, instantaneous level.
+    int             sigma;              // Running total of the samples in the current window.
+
+    /**
+     * Callback provided when data is ready.
+     */
+    virtual int pullRequest();
+
     private:
 
     /**

@@ -28,6 +28,17 @@ DEALINGS IN THE SOFTWARE.
   * Provides a BLE service provides streaming mic data, and magnitude
   */
 #include "MicroBitConfig.h"
+#include "MicroBit.h"
+#include "StreamNormalizer.h"
+#include "LevelDetector.h"
+#include "LevelDetectorSPL.h"
+
+static NRF52ADCChannel *mic = NULL;
+static StreamNormalizer *processor = NULL;
+static LevelDetectorSPL *levelSPL = NULL;
+static int claps = 0;
+static volatile int sample;
+extern  MicroBit uBit;
 
 #if CONFIG_ENABLED(DEVICE_BLE)
 
@@ -42,8 +53,12 @@ const uint16_t MicroBitMicrophoneService::charUUID[ mbbs_cIdxCOUNT] = { 0x9350, 
   * Create a representation of the MicrophoneService
   * @param _ble The instance of a BLE device that we're running on.
   */
-MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) :
+MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) 
 {
+    this->level = 0;
+    this->sigma = 0;
+    this->windowPosition = 0;
+    this->windowSize = LEVEL_DETECTOR_DEFAULT_WINDOW_SIZE;
     // Initialise our characteristic values.
     microphoneDataCharacteristicBuffer   = 0;
     microphonePeriodCharacteristicBuffer = 0;
@@ -65,9 +80,51 @@ MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) :
 
     if ( getConnected())
         listen( true);
+
+    if (mic == NULL){
+        mic = uBit.adc.getChannel(uBit.io.microphone);
+        mic->setGain(7,0);          // Uncomment for v1.47.2
+        //mic->setGain(7,1);        // Uncomment for v1.46.2
+    }
+
+    if (processor == NULL)
+        processor = new StreamNormalizer(mic->output, 0.05f, true, DATASTREAM_FORMAT_8BIT_SIGNED);
+    
+    processor->output.connect(*this);
+
+    uBit.io.runmic.setDigitalValue(1);
+    uBit.io.runmic.setHighDrive(true);
 }
 
+/**
+ * Callback provided when data is ready.
+ */
+int MicroBitMicrophoneService::pullRequest()
+{
+    ManagedBuffer b = processor->pull();
+    int16_t *data = (int16_t *) &b[0];
 
+    int samples = b.length() / 2;
+
+    for (int i=0; i < samples; i++)
+    {
+        sigma += abs(*data);
+        windowPosition++;
+
+        if (windowPosition == windowSize)
+        {
+            level = sigma / windowSize;
+            sigma = 0;
+            windowPosition = 0;
+        }
+
+        data++;
+    }
+
+    notifyChrValue( mbbs_cIdxDATA, (uint8_t *)&level, sizeof(level));
+
+    return DEVICE_OK;
+}
 /**
   * Set up or tear down event listers
   */
@@ -80,13 +137,14 @@ void MicroBitMicrophoneService::listen( bool yes)
             // Ensure thermometer is being updated
             //microphoneDataCharacteristicBuffer   = 1;//thermometer.getTemperature();
             //microphonePeriodCharacteristicBuffer = 1;//thermometer.getPeriod();
-            //EventModel::defaultEventBus->listen(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate, MESSAGE_BUS_LISTENER_IMMEDIATE);
+            EventModel::defaultEventBus->listen(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate, MESSAGE_BUS_LISTENER_IMMEDIATE);
         }
         else
         {
             //EventModel::defaultEventBus->ignore(MICROBIT_ID_THERMOMETER, MICROBIT_THERMOMETER_EVT_UPDATE, this, &MicroBitMicrophoneService::microphoneUpdate);
         }
     }
+
 }
 
 
