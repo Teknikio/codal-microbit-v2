@@ -42,7 +42,7 @@ const uint16_t MicroBitMicrophoneService::charUUID[ mbbs_cIdxCOUNT] = { 0x9350, 
   * Create a representation of the MicrophoneService
   * @param _ble The instance of a BLE device that we're running on.
   */
-MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) 
+MicroBitMicrophoneService::MicroBitMicrophoneService( BLEDevice &_ble ) :
 {
     // Initialise our characteristic values.
     microphoneDataCharacteristicBuffer   = 0;
