@@ -65,14 +65,14 @@ MicroBitAudioService::MicroBitAudioService( BLEDevice &_ble )
 /**
   * Invoked when BLE connects.
   */
-void MicroBitAccelerometerService::onConnect( const microbit_ble_evt_t *p_ble_evt)
+void MicroBitAudioService::onConnect( const microbit_ble_evt_t *p_ble_evt)
 {
 }
 
 /**
   * Invoked when BLE disconnects.
   */
-void MicroBitAccelerometerService::onDisconnect( const microbit_ble_evt_t *p_ble_evt)
+void MicroBitAudioService::onDisconnect( const microbit_ble_evt_t *p_ble_evt)
 {
 
 }
@@ -99,7 +99,7 @@ void analogPitch(int frequency, int ms) {
 /**
   * Callback. Invoked when any of our attributes are written via BLE.
   */
-void MicroBitAccelerometerService::onDataWritten( const microbit_ble_evt_write_t *params)
+void MicroBitAudioService::onDataWritten( const microbit_ble_evt_write_t *params)
 {
     if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= 4)
     {
