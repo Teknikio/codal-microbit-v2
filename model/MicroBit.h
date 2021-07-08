@@ -82,6 +82,7 @@ DEALINGS IN THE SOFTWARE.
 #include "MicroBitTemperatureService.h"
 #include "MicroBitUARTService.h"
 #include "MicroBitMicrophoneService.h"
+#include "MicroBitAudioService.h"
 #endif
 
 #include "MicroBitStorage.h"
