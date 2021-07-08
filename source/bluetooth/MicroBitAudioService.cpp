@@ -57,7 +57,7 @@ MicroBitAudioService::MicroBitAudioService( BLEDevice &_ble )
 
     // Create the data structures that represent each of our characteristics in Soft Device.
     CreateCharacteristic( mbbs_cIdxDATA, charUUID[ mbbs_cIdxDATA],
-                         (uint8_t *)&microphoneDataCharacteristicBuffer,
+                         (uint8_t *)&audioDataCharacteristicBuffer,
                          sizeof(audioDataCharacteristicBuffer), sizeof(audioDataCharacteristicBuffer),
                          microbit_propWRITE);
 }
@@ -101,7 +101,7 @@ void analogPitch(int frequency, int ms) {
   */
 void MicroBitAccelerometerService::onDataWritten( const microbit_ble_evt_write_t *params)
 {
-    if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= sizeof(audioDataCharacteristicBuffer))
+    if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= 4)
     {
         uint16_t freq = (*(params->data) & 0xff00);
         uint16_t dur = 300;
