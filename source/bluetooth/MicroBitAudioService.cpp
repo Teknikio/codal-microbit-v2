@@ -40,7 +40,7 @@ const uint16_t MicroBitAudioService::charUUID[ mbbs_cIdxCOUNT] = { 0x9450 };
 
 static Pin *pin = NULL;
 static uint8_t pitchVolume = 0xff;
-
+extern  MicroBit uBit;
 /**
   * Constructor.
   * Create a representation of the MicrophoneService
