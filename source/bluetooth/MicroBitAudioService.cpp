@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
   * Provides a BLE service provides support for playing notes for specified duration
   */
 
+#include "MicroBitConfig.h"
+#include "MicroBit.h"
+
 #if CONFIG_ENABLED(DEVICE_BLE)
 
 #include "MicroBitAudioService.h"
@@ -103,6 +106,7 @@ void MicroBitAccelerometerService::onDataWritten( const microbit_ble_evt_write_t
         uint16_t freq = (*(params->data) & 0xff00);
         uint16_t dur = 300;
 
+        analogPitch(freq, dur);
     }
 }
 
