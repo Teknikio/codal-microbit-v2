@@ -105,6 +105,8 @@ void MicroBitAudioService::onDataWritten( const microbit_ble_evt_write_t *params
     if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= 4)
     {
         analogPitch(440, 50);
+        pin->setAnalogValue(0);
+        fiber_sleep(5);
         uint16_t freq = (*(params->data) & 0xff00) >> 16;
         uint16_t dur = 300;
 
