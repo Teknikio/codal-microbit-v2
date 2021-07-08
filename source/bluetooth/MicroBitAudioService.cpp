@@ -41,6 +41,9 @@ const uint16_t MicroBitAudioService::charUUID[ mbbs_cIdxCOUNT] = { 0x9450 };
 static Pin *pin = NULL;
 static uint8_t pitchVolume = 0xff;
 extern  MicroBit uBit;
+
+uint16_t freq;
+uint16_t dur;
 /**
   * Constructor.
   * Create a representation of the MicrophoneService
@@ -104,12 +107,11 @@ void MicroBitAudioService::onDataWritten( const microbit_ble_evt_write_t *params
   
     if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= 4)
     {
-        analogPitch(440, 50);
-        uint16_t freq = (*(params->data) & 0xff00) >> 16;
-        uint16_t dur = 300;
-
+        //analogPitch(440, 50);
+        dur = 300;
+        memccpy(&freq, params->data, 2);
         analogPitch(freq, dur);
-        release_fiber();
+        
     }
 }
 
