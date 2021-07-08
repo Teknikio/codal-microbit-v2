@@ -78,7 +78,7 @@ void MicroBitAudioService::onDisconnect( const microbit_ble_evt_t *p_ble_evt)
 }
 
 // Pin control as per MakeCode.
-void analogPitch(int frequency, int ms) {
+void MicroBitAudioService::analogPitch(int frequency, int ms) {
     if (frequency <= 0 || pitchVolume == 0) {
         pin->setAnalogValue(0);
     } else {
