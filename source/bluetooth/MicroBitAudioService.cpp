@@ -101,10 +101,11 @@ void MicroBitAudioService::analogPitch(int frequency, int ms) {
   */
 void MicroBitAudioService::onDataWritten( const microbit_ble_evt_write_t *params)
 {
-  analogPitch(440, 500);
+  
     if (params->handle == valueHandle( mbbs_cIdxDATA) && params->len >= 4)
     {
-        uint16_t freq = (*(params->data) & 0xff00);
+        analogPitch(440, 50);
+        uint16_t freq = (*(params->data) & 0xff00) >> 16;
         uint16_t dur = 300;
 
         analogPitch(freq, dur);
