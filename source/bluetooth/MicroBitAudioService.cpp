@@ -109,7 +109,7 @@ void MicroBitAudioService::onDataWritten( const microbit_ble_evt_write_t *params
     {
         //analogPitch(440, 50);
         dur = 300;
-        memccpy(&freq, params->data, 2);
+        memcpy(&freq, params->data, 2);
         analogPitch(freq, dur);
         
     }
